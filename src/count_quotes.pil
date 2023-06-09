@@ -1,0 +1,45 @@
+constant %N = 1024;
+
+namespace Countquotes(%N);
+    pol constant ISLAST;     // 0,0,0,0,.....,1
+    pol commit json;
+    pol commit isQuote;
+    pol commit quoteCounter;
+    pol commit isInsideQuotesDirty;
+    pol commit firstInQuotes;
+    pol commit isInsideQuotes;
+
+    (json - 34) * isQuote = 0;  // 34 is the ascii code for "
+    (1-ISLAST) * (quoteCounter' - quoteCounter - isQuote') = 0;
+    (1 - isInsideQuotesDirty) * isQuote' + (1 - isQuote') * isInsideQuotesDirty = isInsideQuotesDirty';
+
+    //TODO why doesn't this work?
+    // firstInQuotes = (1 - isInsideQuotesDirty) * isInsideQuotesDirty';
+    // firstInQuotes = (1 - isInsideQuotesDirty) * isQuote';
+
+    isInsideQuotes = (1 - firstInQuotes) * isInsideQuotesDirty;  // isInsideQuotes + firstInQuotes * 0;
+
+    public out = quoteCounter(%N-1);
+    public out2 = quoteCounter(0);
+
+
+
+
+/*
+{"aa"}
+011100
+001100
+
+x   t 1
+x   e 1
+x   s 1
+t   t 1
+e   0 0
+s
+t
+x
+x
+
+
+*/
+
