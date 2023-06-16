@@ -1,0 +1,67 @@
+constant %N = 1024;
+
+namespace Global(%N);
+    pol constant L1;    // 1, 0, 0, 0, 0,
+
+namespace Jsonparser(%N);
+    pol constant ISLAST;     // 0,0,0,0,.....,1
+    pol constant COUNTER;    // 1,2,3,4,.....,N
+
+    pol commit json;
+    pol commit isQuote;
+    pol commit isColon;
+    pol commit isComma;
+    pol commit isKeyArea;
+    pol commit isInsideQuotes;
+    pol commit isFirstInsideQuotes;
+    pol commit keyValueIndex;
+    pol commit keyValueSymbolIndex;
+
+    pol commit key;
+    pol commit value;
+    pol commit index;
+    pol commit isKey;
+    pol commit isValue;
+
+    (json - 34) * isQuote = 0;  // 34 is the ascii code for "
+    (json - 58) * isColon = 0;  // 58 is the ascii code for :
+    (json - 44) * isComma = 0;  // 44 is the ascii code for ,
+
+    pol isColonOrComma = isColon + isComma;
+    ISLAST + (1 - isKeyArea) * isColonOrComma' + (1 - isColonOrComma') * isKeyArea = isKeyArea';
+
+    (1 - isInsideQuotes) * isQuote' + (1 - isQuote') * isInsideQuotes = isInsideQuotes';
+
+    // This constraint may be not mandatory
+    (1 - isInsideQuotes) * isInsideQuotes' = isFirstInsideQuotes';
+
+    (1 - ISLAST) * (isComma' + keyValueIndex) = keyValueIndex';
+
+    keyValueSymbolIndex' = (isInsideQuotes + keyValueSymbolIndex) * isInsideQuotes';
+
+    index' = index;
+
+    isKey { key, index, COUNTER } in isKeyArea { json, keyValueIndex, keyValueSymbolIndex };
+    isValue { value, index, COUNTER } in (1 - isKeyArea) { json, keyValueIndex, keyValueSymbolIndex };
+
+    public key0 = key(0);
+    public key1 = key(1);
+    public key2 = key(2);
+    public key3 = key(3);
+    public key4 = key(4);
+    public key5 = key(5);
+    public key6 = key(6);
+    public key7 = key(7);
+    public key8 = key(8);
+    public key9 = key(9);
+
+    public value0 = value(0);
+    public value1 = value(1);
+    public value2 = value(2);
+    public value3 = value(3);
+    public value4 = value(4);
+    public value5 = value(5);
+    public value6 = value(6);
+    public value7 = value(7);
+    public value8 = value(8);
+    public value9 = value(9);

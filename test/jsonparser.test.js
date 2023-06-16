@@ -3,9 +3,18 @@ const path = require("path");
 const { FGL, starkSetup, starkGen, starkVerify } = require("pil-stark");
 const { newConstantPolsArray, newCommitPolsArray, compile, verifyPil } = require("pilcom");
 
-const smJsonParse = require("../src/json_parse.js");
+const smJsonParser = require("../src/jsonparser.js");
+const smGlobal = require("../src/global.js");
 
-describe("test json parse sm", async function () {
+
+const obj = {
+    country: "Italy",
+    name: "John",
+    surname: "Doe",
+    age: "30",
+}
+
+describe("test jsonparser sm", async function () {
     let constPols;
     let cmPols;
     let pil;
@@ -13,20 +22,14 @@ describe("test json parse sm", async function () {
     this.timeout(10000000);
 
     it("It should create the pols main", async () => {
-
-        pil = await compile(FGL, path.join(__dirname, "..", "src", "json_parse.pil"));
+        pil = await compile(FGL, path.join(__dirname, "..", "src", "jsonparser.pil"));
 
         constPols =  newConstantPolsArray(pil);
+        smJsonParser.buildConstants(constPols.Jsonparser);
+        smGlobal.buildConstants(constPols.Global);
+
         cmPols = newCommitPolsArray(pil);
-
-        const jsonObject = {
-          age: 35,
-          country: "Italy",
-        }
-        const jsonStr = JSON.stringify(jsonObject);
-
-        const result = await smJsonParse.execute(cmPols.Jsonparse, jsonStr, "country", "Italy");
-        console.log("Result: " + result);
+        smJsonParser.execute(cmPols.Jsonparser, obj, "age", "30");
 
         await verifyPil(FGL, pil, cmPols , constPols);
     });
@@ -49,5 +52,9 @@ describe("test json parse sm", async function () {
 
         const resV = await starkVerify(resP.proof, resP.publics, setup.constRoot, setup.starkInfo);
         assert(resV==true);
-  });
+
+        console.log("resP.publics:", resP.publics.reduce((acc, curr) => {
+            return acc + (parseInt(curr) === 0 ? " " : String.fromCharCode(parseInt(curr)));
+        }, ""));
+    });
 });
